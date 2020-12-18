@@ -6,5 +6,5 @@ export const LoadingComponent: React.FC<{ inverted?: boolean, content?: string }
         <Dimmer active inverted={inverted}>
             <Loader content={content} />
         </Dimmer>
-    )
-}
+    );
+};

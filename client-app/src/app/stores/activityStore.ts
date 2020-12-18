@@ -9,7 +9,7 @@ class ActivityStore {
         makeObservable(this, {
             activities: observable,
             activityRegistry: observable,
-            selectedActivity: observable,
+            activity: observable,
             loadingInitial: observable,
             editMode: observable,
             submitting: observable,
@@ -20,13 +20,14 @@ class ActivityStore {
             createActivity: action,
             openCreateForm: action,
             editActivity: action,
-            setEditMode: action
+            setEditMode: action,
+            loadActivity: action
         });
     };
 
     activities: IActivity[] = [];
     activityRegistry = new Map();
-    selectedActivity: IActivity | null = null;
+    activity: IActivity | null = null;
     loadingInitial = false;
     editMode = false;
     submitting = false;
@@ -35,6 +36,8 @@ class ActivityStore {
     get activitiesByDate() {
         return Array.from(this.activityRegistry.values()).sort((a, b) => Date.parse(a.date) - Date.parse(b.date));
     };
+
+    getActivity = (id: string) => this.activityRegistry.get(id);
 
     loadActivities = async () => {
         this.loadingInitial = true;
@@ -55,8 +58,28 @@ class ActivityStore {
         };
     };
 
+    loadActivity = async (id: string) => {
+        let activity = this.getActivity(id);
+        if (activity) {
+            this.activity = activity;
+        } else {
+            try {
+                this.loadingInitial = true;
+                this.activity = await agent.Activities.details(id);
+                runInAction(() => {
+                    this.loadingInitial = false;
+                });
+            } catch (error) {
+                runInAction(() => {
+                    this.loadingInitial = true;
+                });
+                console.log(error);
+            }
+        }
+    };
+
     selectActivity = (id: string | null) => {
-        this.selectedActivity = this.activityRegistry.get(id) || null;
+        this.activity = this.activityRegistry.get(id) || null;
         this.editMode = false;
     };
 
@@ -69,7 +92,7 @@ class ActivityStore {
                 this.selectActivity(activity.id);
                 this.submitting = false;
             });
-            
+
         } catch (error) {
             runInAction(() => {
                 this.submitting = false;
@@ -117,7 +140,7 @@ class ActivityStore {
 
     openCreateForm = () => {
         this.editMode = true;
-        this.selectedActivity = null;
+        this.activity = null;
     };
 
     setEditMode = (mode: boolean) => {
