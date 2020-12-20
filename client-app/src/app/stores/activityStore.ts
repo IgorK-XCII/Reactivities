@@ -3,11 +3,13 @@ import { createContext, SyntheticEvent } from "react";
 import { IActivity } from "../models/activity";
 import agent from "../api/agent";
 
+interface IActivityAcc {
+    [key: string]: IActivity[]
+};
 
 class ActivityStore {
     constructor() {
         makeObservable(this, {
-            activities: observable,
             activityRegistry: observable,
             activity: observable,
             loadingInitial: observable,
@@ -25,7 +27,6 @@ class ActivityStore {
         });
     };
 
-    activities: IActivity[] = [];
     activityRegistry = new Map();
     activity: IActivity | null = null;
     loadingInitial = false;
@@ -34,7 +35,20 @@ class ActivityStore {
     target = '';
 
     get activitiesByDate() {
-        return Array.from(this.activityRegistry.values()).sort((a, b) => Date.parse(a.date) - Date.parse(b.date));
+        return this.groupActivitiesByDate(Array.from(this.activityRegistry.values()));
+    };
+
+    groupActivitiesByDate = (activities:IActivity[]) => {
+        const sortedActivities = activities.sort(
+            (a, b) => Date.parse(a.date) - Date.parse(b.date)
+        );
+        return Object.entries(sortedActivities.reduce(
+          (acc: IActivityAcc, act) => {
+              const date = act.date.split('T')[0];
+              acc[date] = acc[date] ? [...acc[date], act] : [act];
+              return acc;
+          }, {} 
+        ));
     };
 
     getActivity = (id: string) => this.activityRegistry.get(id);
