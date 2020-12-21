@@ -40,7 +40,7 @@ const ActivityForm: React.FC<RouteComponentProps<DetailParams>> = ({ match, hist
         };
     }, [match.params, loadActivity, initialFromState, selectActivity]);
 
-    if (loadingInitial) return <LoadingComponent content='Loading...' />
+    if (loadingInitial) return <LoadingComponent content='Loading...' />;
 
     const { id, title, description, category, date, city, venue } = activity;
 
@@ -64,7 +64,7 @@ const ActivityForm: React.FC<RouteComponentProps<DetailParams>> = ({ match, hist
         } else {
             await editActivity(activity);
             history.push(`/activities/${id}`);
-        }
+        };
     };
 
     return (

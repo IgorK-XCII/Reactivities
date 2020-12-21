@@ -19,12 +19,12 @@ namespace API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<Activity>>> List() => 
+        public async Task<ActionResult<List<Activity>>> List() =>
             await _mediator.Send(new List.Query());
 
         [HttpGet("{id}")]
         public async Task<ActionResult<Activity>> Details(Guid id) =>
-            await _mediator.Send(new Details.Query {Id = id});
+            await _mediator.Send(new Details.Query { Id = id });
 
         [HttpPost]
         public async Task<ActionResult<Unit>> Create(Create.Command command) =>
@@ -36,6 +36,6 @@ namespace API.Controllers
 
         [HttpDelete("{id}")]
         public async Task<ActionResult<Unit>> Remove(Guid id) =>
-            await _mediator.Send(new Delete.Command {Id = id});
+            await _mediator.Send(new Delete.Command { Id = id });
     }
 }
