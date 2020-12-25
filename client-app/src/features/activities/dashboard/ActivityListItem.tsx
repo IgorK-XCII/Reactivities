@@ -1,3 +1,4 @@
+import { format } from 'date-fns';
 import { observer } from 'mobx-react-lite';
 import React from 'react';
 import { Link } from 'react-router-dom';
@@ -8,9 +9,9 @@ interface IProps {
     activity: IActivity
 };
 
-const ActivityListItem: React.FC<IProps> = ({ activity }) => {
-    const { id, title, date, description, city, venue } = activity;
-    return (
+const ActivityListItem: React.FC<IProps> = ({
+    activity: { id, title, date, description, city, venue }
+}) => (
         <Segment.Group>
             <Segment>
                 <Item.Group>
@@ -26,7 +27,7 @@ const ActivityListItem: React.FC<IProps> = ({ activity }) => {
                 </Item.Group>
             </Segment>
             <Segment>
-                <Icon name='clock' /> {date}
+                <Icon name='clock' /> {format(date, 'hh:mm a')}
                 <Icon name='marker' /> {venue}, {city}
             </Segment>
             <Segment secondary>
@@ -41,7 +42,6 @@ const ActivityListItem: React.FC<IProps> = ({ activity }) => {
                     as={Link} to={`/activities/${id}`} />
             </Segment>
         </Segment.Group>
-    );
-};
+);
 
 export default observer(ActivityListItem);

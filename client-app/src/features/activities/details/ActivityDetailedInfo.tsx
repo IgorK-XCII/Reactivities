@@ -1,3 +1,4 @@
+import { format } from 'date-fns';
 import { observer } from 'mobx-react-lite';
 import React from 'react';
 import { Segment, Grid, Icon } from 'semantic-ui-react';
@@ -7,8 +8,7 @@ interface IProps {
     activity: IActivity
 }
 
-const ActivityDetailedInfo: React.FC<IProps> = ({ activity }) => {
-    const { description, date, venue, city } = activity;
+const ActivityDetailedInfo: React.FC<IProps> = ({ activity: { description, date, venue, city } }) => {
     return (
         <Segment.Group>
             <Segment attached='top'>
@@ -28,7 +28,7 @@ const ActivityDetailedInfo: React.FC<IProps> = ({ activity }) => {
                     </Grid.Column>
                     <Grid.Column width={15}>
                         <span>
-                            {date}
+                            {format(date, 'eee do MMMM')} at {format(date, 'h:mm a')}
                         </span>
                     </Grid.Column>
                 </Grid>
