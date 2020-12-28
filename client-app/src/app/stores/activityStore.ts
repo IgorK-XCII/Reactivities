@@ -1,5 +1,6 @@
+import { RootStore } from './rootStore';
 import { action, observable, makeObservable, computed, runInAction } from "mobx";
-import { createContext, SyntheticEvent } from "react";
+import { SyntheticEvent } from "react";
 import { IActivity } from "../models/activity";
 import agent from "../api/agent";
 import { format } from "date-fns";
@@ -9,8 +10,8 @@ interface IActivityAcc {
     [key: string]: IActivity[]
 };
 
-class ActivityStore {
-    constructor() {
+export default class ActivityStore {
+    constructor(private rootStore: RootStore) {
         makeObservable(this, {
             activityRegistry: observable,
             activity: observable,
@@ -40,16 +41,16 @@ class ActivityStore {
         return this.groupActivitiesByDate(Array.from(this.activityRegistry.values()));
     };
 
-    groupActivitiesByDate = (activities:IActivity[]) => {
+    groupActivitiesByDate = (activities: IActivity[]) => {
         const sortedActivities = activities.sort(
             (a, b) => a.date.getTime() - b.date.getTime()
         );
         return Object.entries(sortedActivities.reduce(
-          (acc: IActivityAcc, act) => {
-              const date = format(new Date(act.date), 'eeee do MMMM');
-              acc[date] = acc[date] ? [...acc[date], act] : [act];
-              return acc;
-          }, {} 
+            (acc: IActivityAcc, act) => {
+                const date = format(new Date(act.date), 'eeee do MMMM');
+                acc[date] = acc[date] ? [...acc[date], act] : [act];
+                return acc;
+            }, {}
         ));
     };
 
@@ -171,4 +172,3 @@ class ActivityStore {
     };
 };
 
-export default createContext(new ActivityStore());

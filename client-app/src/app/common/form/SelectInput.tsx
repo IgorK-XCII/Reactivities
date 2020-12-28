@@ -9,7 +9,6 @@ const SelectInput: React.FC<IProps> = ({
     width,
     type,
     options,
-    rows,
     placeholder,
     meta: { touched, error }
 }) => (
