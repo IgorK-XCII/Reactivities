@@ -47,7 +47,7 @@ export const Activities = {
     list: (): Promise<IActivity[]> => request.get('/activities'),
     details: (id: string): Promise<IActivity> => request.get(`/activities/${id}`),
     create: (activity: IActivity) => request.post('/activities', activity),
-    edit: (activity: IActivity) => request.put('/activities', activity),
+    edit: (activity: IActivity) => request.put(`/activities/${activity.id}`, activity),
     remove: (id: string) => request.del(`/activities/${id}`)
 };
 
