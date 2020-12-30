@@ -1,9 +1,10 @@
 import { format } from 'date-fns';
 import { observer } from 'mobx-react-lite';
-import React from 'react';
+import React, { useContext } from 'react';
 import { Link } from 'react-router-dom';
 import { Button, Header, Item, Segment, Image } from 'semantic-ui-react';
 import { IActivity } from '../../../app/models/activity';
+import { rootStoreContext } from '../../../app/stores/rootStore';
 
 const activityImageStyle = {
     filter: 'brightness(30%)'
@@ -22,7 +23,8 @@ interface IProps {
     activity: IActivity
 };
 
-const ActivityDetailedHeader: React.FC<IProps> = ({ activity: { id, category, title, date } }) => {
+const ActivityDetailedHeader: React.FC<IProps> = ({ activity: { id, category, title, date, isHost, isGoing } }) => {
+    const { activityStore: { attendActivity, unattendActivity, loading } } = useContext(rootStoreContext);
     return (
         <Segment.Group>
             <Segment basic attached='top' style={{ padding: '0' }}>
@@ -46,11 +48,23 @@ const ActivityDetailedHeader: React.FC<IProps> = ({ activity: { id, category, ti
                 </Segment>
             </Segment>
             <Segment clearing attached='bottom'>
-                <Button color='teal'>Join Activity</Button>
-                <Button>Cancel attendance</Button>
-                <Button as={Link} to={`/manage/${id}`} color='orange' floated='right'>
-                    Manage Event
-                </Button>
+                {isHost ?
+                    (
+                        <Button as={Link} to={`/manage/${id}`} color='orange' floated='right'>
+                            Manage Event
+                        </Button>
+                    ) :
+                    isGoing ?
+                    (
+                        <Button onClick={unattendActivity} loading={loading}>
+                            Cancel attendance
+                        </Button>
+                    ) :
+                    (
+                        <Button color='teal' onClick={attendActivity} loading={loading}>
+                            Join Activity
+                        </Button>
+                    )}
             </Segment>
         </Segment.Group>
     );

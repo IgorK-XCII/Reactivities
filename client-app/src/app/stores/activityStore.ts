@@ -5,6 +5,7 @@ import { IActivity } from "../models/activity";
 import agent from "../api/agent";
 import { format } from "date-fns";
 import { toast } from "react-toastify";
+import { createAttendee, setActivityProps } from '../util/util';
 
 interface IActivityAcc {
     [key: string]: IActivity[]
@@ -19,6 +20,7 @@ export default class ActivityStore {
             editMode: observable,
             submitting: observable,
             target: observable,
+            loading: observable,
             activitiesByDate: computed,
             loadActivities: action,
             selectActivity: action,
@@ -26,7 +28,9 @@ export default class ActivityStore {
             openCreateForm: action,
             editActivity: action,
             setEditMode: action,
-            loadActivity: action
+            loadActivity: action,
+            attendActivity: action,
+            unattendActivity: action
         });
     };
 
@@ -36,6 +40,7 @@ export default class ActivityStore {
     editMode = false;
     submitting = false;
     target = '';
+    loading = false;
 
     get activitiesByDate() {
         return this.groupActivitiesByDate(Array.from(this.activityRegistry.values()));
@@ -62,7 +67,7 @@ export default class ActivityStore {
             const acts = await agent.Activities.list();
             runInAction(() => {
                 acts.forEach((act: IActivity): void => {
-                    act.date = new Date(act.date);
+                    setActivityProps(act, this.rootStore.userStore.user!);
                     this.activityRegistry.set(act.id, act);
                 });
                 this.loadingInitial = false;
@@ -85,7 +90,7 @@ export default class ActivityStore {
                 this.loadingInitial = true;
                 activity = await agent.Activities.details(id);
                 runInAction(() => {
-                    activity.date = new Date(activity.date);
+                    setActivityProps(activity, this.rootStore.userStore.user!);
                     this.activity = activity;;
                     this.loadingInitial = false;
                 });
@@ -108,6 +113,10 @@ export default class ActivityStore {
         this.submitting = true;
         try {
             await agent.Activities.create(activity);
+            const attendee = createAttendee(this.rootStore.userStore.user!);
+            attendee.isHost = true;
+            activity.isHost = true;
+            activity.attendees = [attendee];
             runInAction(() => {
                 this.activityRegistry.set(activity.id, activity);
                 this.selectActivity(activity.id);
@@ -170,5 +179,49 @@ export default class ActivityStore {
     setEditMode = (mode: boolean) => {
         this.editMode = mode;
     };
+
+    attendActivity = async () => {
+        const attendee = createAttendee(this.rootStore.userStore.user!);
+        this.loading = true;
+        try {
+            await agent.Activities.attend(this.activity!.id);
+            runInAction(() => {
+                if (this.activity) {
+                    this.activity.attendees.push(attendee);
+                    this.activity.isGoing = true;
+                    this.activityRegistry.set(this.activity.id, this.activity);
+                    this.loading = false;
+                }
+            });
+        } catch (error) {
+            runInAction(() => {
+                this.loading = false;
+            });
+            toast.error('Problem signing up to activity')
+            console.log(error);
+        }
+    }
+
+    unattendActivity = async () => {
+        this.loading = true;
+        try {
+            await agent.Activities.unattend(this.activity!.id);
+            runInAction(() => {
+                if (this.activity) {
+                    this.activity.attendees = this.activity.attendees.filter(a => a.username !== this.rootStore.userStore.user?.username);
+                    this.activity.isGoing = false;
+                    this.activityRegistry.set(this.activity.id, this.activity);
+                    this.loading = false;
+                }
+            });
+
+        } catch (error) {
+            runInAction(() => {
+                this.loading = false;
+            });
+            toast.error('Problem cancel attendance');
+            console.log(error);
+        }
+    }
 };
 
