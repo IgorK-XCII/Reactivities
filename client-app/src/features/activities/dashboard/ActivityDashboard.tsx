@@ -12,7 +12,7 @@ const ActivityDashboard: React.FC = () => {
     } = useContext(rootStoreContext);
 
     useEffect(() => {
-        if (!activitiesByDate.length) loadActivities();
+        if (activitiesByDate.length <= 1) loadActivities();
     }, [loadActivities, activitiesByDate.length])
 
     if (loadingInitial) return <LoadingComponent content='Loading activities...' />;

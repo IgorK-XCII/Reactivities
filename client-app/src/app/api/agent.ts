@@ -48,7 +48,9 @@ export const Activities = {
     details: (id: string): Promise<IActivity> => request.get(`/activities/${id}`),
     create: (activity: IActivity) => request.post('/activities', activity),
     edit: (activity: IActivity) => request.put(`/activities/${activity.id}`, activity),
-    remove: (id: string) => request.del(`/activities/${id}`)
+    remove: (id: string) => request.del(`/activities/${id}`),
+    attend: (id: string): Promise<void>=> request.post(`/activities/${id}/attend`, {}),
+    unattend: (id: string): Promise<void>=> request.del(`/activities/${id}/attend`)
 };
 
 const User = {
