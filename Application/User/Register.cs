@@ -72,7 +72,7 @@ namespace Application.User
                         DisplayName = user.DisplayName,
                         Token = _tokenGenerator.GenerateToken(user),
                         Username = user.UserName,
-                        Image = null
+                        Image = user.Photos.FirstOrDefault(x => x.IsMain)?.Url
                     };
                 }
 
