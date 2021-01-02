@@ -9,11 +9,11 @@ import ActivityDetailedHeader from './ActivityDetailedHeader';
 import ActivityDetailedInfo from './ActivityDetailedInfo';
 import ActivityDetailedSidebar from './ActivityDetailedSidebar';
 
-interface DetailParams {
+interface IDetailParams {
     id: string
 };
 
-const ActivityDetails: React.FC<RouteComponentProps<DetailParams>> = ({ match, history }) => {
+const ActivityDetails: React.FC<RouteComponentProps<IDetailParams>> = ({ match, history }) => {
     const { activityStore: { activity, loadActivity, loadingInitial } } = useContext(rootStoreContext);
 
     useEffect(() => {

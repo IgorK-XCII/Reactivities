@@ -14,6 +14,7 @@ import { rootStoreContext } from '../stores/rootStore';
 import LoginForm from '../../features/user/LoginForm';
 import { LoadingComponent } from './LoadingComponent';
 import ModalContainet from '../common/modals/ModalContainet';
+import ProfilePage from '../../features/profiles/ProfilePage';
 
 const App: React.FC<RouteComponentProps> = ({ location }) => {
   const {
@@ -58,6 +59,10 @@ const App: React.FC<RouteComponentProps> = ({ location }) => {
               <Route
                 path='/login'
                 component={LoginForm}
+              />
+              <Route
+                path='/profile/:username'
+                component={ProfilePage}
               />
               <Route component={NotFound} />
             </Switch>
