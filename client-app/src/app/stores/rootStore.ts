@@ -2,6 +2,7 @@ import { createContext } from "react";
 import ActivityStore from "./activityStore";
 import CommonStore from "./commonStore";
 import ModalStore from "./modalStore";
+import ProfileStore from "./profileStore";
 import UserStore from "./userStore";
 
 export class RootStore {
@@ -9,6 +10,7 @@ export class RootStore {
     userStore: UserStore = new UserStore(this);
     commonStore = new CommonStore(this);
     modalStore = new ModalStore(this);
+    profileStore = new ProfileStore(this);
 }
 
 export const rootStoreContext =  createContext(new RootStore());

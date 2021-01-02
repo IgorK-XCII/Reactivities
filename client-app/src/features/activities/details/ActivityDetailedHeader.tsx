@@ -23,8 +23,11 @@ interface IProps {
     activity: IActivity
 };
 
-const ActivityDetailedHeader: React.FC<IProps> = ({ activity: { id, category, title, date, isHost, isGoing } }) => {
+const ActivityDetailedHeader: React.FC<IProps> = ({ activity: { id, category, title, date, isHost, isGoing, attendees } }) => {
     const { activityStore: { attendActivity, unattendActivity, loading } } = useContext(rootStoreContext);
+
+    const { displayName, username } = attendees.find(a => a.isHost)!;
+
     return (
         <Segment.Group>
             <Segment basic attached='top' style={{ padding: '0' }}>
@@ -40,7 +43,7 @@ const ActivityDetailedHeader: React.FC<IProps> = ({ activity: { id, category, ti
                                 />
                                 <p>{format(date, 'eeee do MMMM')}</p>
                                 <p>
-                                    Hosted by <strong>Bob</strong>
+                                    Hosted by <Link to={`/profile/${username}`}><strong>{displayName}</strong></Link> 
                                 </p>
                             </Item.Content>
                         </Item>

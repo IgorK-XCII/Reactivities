@@ -1,9 +1,11 @@
+import { IPhoto } from './../models/profile';
 import { IUserFormValues } from './../models/user';
 import { history } from './../../index';
 import { IActivity } from './../models/activity';
 import axios, { AxiosResponse } from 'axios';
 import { toast } from 'react-toastify';
 import { IUser } from '../models/user';
+import { IProfile } from '../models/profile';
 
 axios.defaults.baseURL = 'http://localhost:5000/api';
 
@@ -40,7 +42,14 @@ const request = {
     get: (url: string) => axios.get(url).then(sleep(1000)).then(responseBody),
     post: (url: string, body: {}) => axios.post(url, body).then(sleep(1000)).then(responseBody),
     put: (url: string, body: {}) => axios.put(url, body).then(sleep(1000)).then(responseBody),
-    del: (url: string) => axios.delete(url).then(sleep(1000)).then(responseBody)
+    del: (url: string) => axios.delete(url).then(sleep(1000)).then(responseBody),
+    postForm: (url: string, file: Blob) => {
+        let formData = new FormData();
+        formData.append('File', file);
+        return axios.post(url, formData, {
+            headers: { 'Content-type': 'multipart/form-data' }
+        }).then(responseBody);
+    }
 };
 
 export const Activities = {
@@ -49,8 +58,8 @@ export const Activities = {
     create: (activity: IActivity) => request.post('/activities', activity),
     edit: (activity: IActivity) => request.put(`/activities/${activity.id}`, activity),
     remove: (id: string) => request.del(`/activities/${id}`),
-    attend: (id: string): Promise<void>=> request.post(`/activities/${id}/attend`, {}),
-    unattend: (id: string): Promise<void>=> request.del(`/activities/${id}/attend`)
+    attend: (id: string): Promise<void> => request.post(`/activities/${id}/attend`, {}),
+    unattend: (id: string): Promise<void> => request.del(`/activities/${id}/attend`)
 };
 
 const User = {
@@ -59,9 +68,17 @@ const User = {
     register: (user: IUserFormValues): Promise<IUser> => request.post('/user/register', user),
 }
 
+const Profiles = {
+    get: (username: string): Promise<IProfile> => request.get(`/profiles/${username}`),
+    uploadPhoto: (photo: Blob): Promise<IPhoto> => request.postForm('/photos', photo),
+    setMainPhoto: (photoId: string): Promise<void> => request.post(`/photos/${photoId}/setmain`, {}),
+    deletePhoto: (photoId: string): Promise<void> => request.del(`/photos/${photoId}`),
+}
+
 const agent = {
     Activities,
-    User
+    User,
+    Profiles
 };
 
 export default agent;

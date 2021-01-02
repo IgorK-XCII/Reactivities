@@ -13,18 +13,22 @@ interface IProps {
 const ActivityListItem: React.FC<IProps> = ({
     activity: { id, title, date, description, city, venue, attendees, isHost, isGoing }
 }) => {
-    const { displayName, image } = attendees.find(a => a.isHost)!;
+    const { displayName, username, image } = attendees.find(a => a.isHost)!;
 
     return (
         <Segment.Group>
             <Segment>
                 <Item.Group>
                     <Item key={id}>
-                        <Item.Image size='tiny' circular src={image || '/assets/user.png'} />
+                        <Item.Image
+                            size='tiny'
+                            circular src={image || '/assets/user.png'}
+                            style={{ marginBottom: 3 }}
+                        />
                         <Item.Content>
                             <Item.Header as={Link} to={`/activities/${id}`} >{title}</Item.Header>
                             <Item.Description>
-                                {`Hosted by ${displayName}`}
+                                Hosted by <Link to={`/profile/${username}`}>{displayName}</Link>
                             </Item.Description>
                             {isHost &&
                                 <Item.Description>
