@@ -1,4 +1,4 @@
-import { IPhoto } from './../models/profile';
+import { IPhoto, IDescription } from './../models/profile';
 import { IUserFormValues } from './../models/user';
 import { history } from './../../index';
 import { IActivity } from './../models/activity';
@@ -70,6 +70,7 @@ const User = {
 
 const Profiles = {
     get: (username: string): Promise<IProfile> => request.get(`/profiles/${username}`),
+    editDescription: (description: IDescription) : Promise<void> => request.put('/profiles/', description),
     uploadPhoto: (photo: Blob): Promise<IPhoto> => request.postForm('/photos', photo),
     setMainPhoto: (photoId: string): Promise<void> => request.post(`/photos/${photoId}/setmain`, {}),
     deletePhoto: (photoId: string): Promise<void> => request.del(`/photos/${photoId}`),

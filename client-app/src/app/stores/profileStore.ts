@@ -1,5 +1,5 @@
 import { toast } from 'react-toastify';
-import { IPhoto, IProfile } from './../models/profile';
+import { IDescription, IPhoto, IProfile } from './../models/profile';
 import { action, makeObservable, observable, runInAction, computed } from "mobx";
 import { RootStore } from "./rootStore";
 import agent from '../api/agent';
@@ -11,11 +11,13 @@ export default class ProfileStore {
             loadingProfile: observable,
             uploadingPhoto: observable,
             settingMainPhoto: observable,
+            editingDescription: observable,
             isCurrentUser: computed,
             loadProfile: action,
             uploadPhoto: action,
             setMainPhoto: action,
-            deletePhoto: action
+            deletePhoto: action,
+            editDescription: action
         })
     }
 
@@ -24,6 +26,7 @@ export default class ProfileStore {
     uploadingPhoto = false;
     settingMainPhoto = false;
     deletingPhoto = false;
+    editingDescription = false;
 
     get isCurrentUser() {
         const currentUser = this.rootStore.userStore.user;
@@ -106,8 +109,7 @@ export default class ProfileStore {
             await agent.Profiles.deletePhoto(photo.id);
             runInAction(() => {
                 if (this.rootStore.userStore.user && this.profile) {
-                    const photos = this.profile.photos.filter(p => p.id !== photo.id);
-                    this.profile.photos = photos;
+                    this.profile.photos = this.profile.photos.filter(p => p.id !== photo.id);
                 }
                 this.deletingPhoto = false;
             });
@@ -116,6 +118,29 @@ export default class ProfileStore {
                 this.deletingPhoto = false;
             });
             console.log(error);
+        }
+    }
+
+    editDescription = async (description: IDescription) => {
+        this.editingDescription = true;
+        const { displayName, bio } = description;
+        try {
+            await agent.Profiles.editDescription(description);
+            runInAction(() => {
+                if (this.rootStore.userStore.user && this.profile) {
+
+                    this.profile.displayName = displayName;
+                    this.profile.bio = bio;
+                    this.rootStore.userStore.user.displayName = displayName;
+                }
+                this.editingDescription = false;
+            });
+        } catch (error) {
+            runInAction(() => {
+                this.editingDescription = false;
+            });
+            console.log(error);
+            toast.error('Cannot edit profile description');
         }
     }
 }
