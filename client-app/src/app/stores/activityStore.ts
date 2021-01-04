@@ -6,6 +6,7 @@ import agent from "../api/agent";
 import { format } from "date-fns";
 import { toast } from "react-toastify";
 import { createAttendee, setActivityProps } from '../util/util';
+import { HubConnection, HubConnectionBuilder, LogLevel } from '@microsoft/signalr';
 
 interface IActivityAcc {
     [key: string]: IActivity[]
@@ -21,6 +22,7 @@ export default class ActivityStore {
             submitting: observable,
             target: observable,
             loading: observable,
+            hubConnection: observable.ref,
             activitiesByDate: computed,
             loadActivities: action,
             selectActivity: action,
@@ -30,7 +32,11 @@ export default class ActivityStore {
             setEditMode: action,
             loadActivity: action,
             attendActivity: action,
-            unattendActivity: action
+            unattendActivity: action,
+            createHubConnection: action,
+            stopHubConnection: action,
+            addComment: action
+
         });
     };
 
@@ -41,10 +47,55 @@ export default class ActivityStore {
     submitting = false;
     target = '';
     loading = false;
+    hubConnection: HubConnection | null = null;
 
     get activitiesByDate() {
         return this.groupActivitiesByDate(Array.from(this.activityRegistry.values()));
     };
+
+    createHubConnection = (activityId: string) => {
+        this.hubConnection = new HubConnectionBuilder()
+            .withUrl('http://localhost:5000/chat', {
+                accessTokenFactory: () => this.rootStore.commonStore.token!
+            })
+            .configureLogging(LogLevel.Information)
+            .build();
+
+        this.hubConnection
+            .start()
+            .then(() => console.log(this.hubConnection!.state))
+            .then(() => {
+                if (this.hubConnection!.state === 'Connected') {
+                    this.hubConnection!.invoke('AddToGroup', activityId)
+                }
+            })
+            .catch(error => console.log('Error establishing connection: ', error));
+
+        this.hubConnection.on('ReceiveComment', comment => {
+            runInAction(() => {
+                this.activity?.comments.push(comment);
+            })
+        })
+    }
+
+    stopHubConnection = () => {
+
+        this.hubConnection?.invoke('RemoveFromGroup', this.activity?.id)
+            .then(() => {
+                this.hubConnection?.stop();
+            })
+            .then(() => console.log('Connection stopped'))
+            .catch((error) => console.log(error))
+    }
+
+    addComment = async (values: any) => {
+        values.activityId = this.activity?.id;
+        try {
+            await this.hubConnection?.invoke('SendComment', values);
+        } catch (error) {
+            console.log(error);
+        }
+    }
 
     groupActivitiesByDate = (activities: IActivity[]) => {
         const sortedActivities = activities.sort(
@@ -117,6 +168,7 @@ export default class ActivityStore {
             attendee.isHost = true;
             activity.isHost = true;
             activity.attendees = [attendee];
+            activity.comments = [];
             runInAction(() => {
                 this.activityRegistry.set(activity.id, activity);
                 this.selectActivity(activity.id);
