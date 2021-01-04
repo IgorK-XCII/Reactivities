@@ -20,7 +20,6 @@ const ProfileDescription: React.FC = () => {
                             content={editDescriptionMode ? 'Cancel' : 'Edit description'}
                             onClick={() => setEditDescriptionMode(!editDescriptionMode)}
                         />}
-
                 </Grid.Column>
                 <Grid.Column width={16}>
                     {editDescriptionMode ?
