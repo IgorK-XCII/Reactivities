@@ -5,10 +5,18 @@ import { IProfile } from '../../app/models/profile';
 
 interface IProps {
   profile: IProfile;
+  isCurrentUser: boolean;
+  loading: boolean;
+  follow: (username: string) => void;
+  unfollow: (username: string) => void;
 }
 
 const ProfileHeader: React.FC<IProps> = ({
-  profile: { displayName, image }
+  profile: { displayName, image, followersCount, followingCount, following, username },
+  isCurrentUser,
+  loading,
+  follow,
+  unfollow
 }) => {
   return (
     <Segment>
@@ -29,27 +37,30 @@ const ProfileHeader: React.FC<IProps> = ({
         </Grid.Column>
         <Grid.Column width={4}>
           <Statistic.Group widths={2}>
-            <Statistic label='Followers' value='5' />
-            <Statistic label='Following' value='42' />
+            <Statistic label='Followers' value={followersCount} />
+            <Statistic label='Following' value={followingCount} />
           </Statistic.Group>
           <Divider />
-          <Reveal animated='move'>
-            <Reveal.Content visible style={{ width: '100%' }}>
-              <Button
-                fluid
-                color='teal'
-                content='Following'
-              />
-            </Reveal.Content>
-            <Reveal.Content hidden>
-              <Button
-                fluid
-                basic
-                color={true ? 'red' : 'green'}
-                content={true ? 'Unfollow' : 'Follow'}
-              />
-            </Reveal.Content>
-          </Reveal>
+          {!isCurrentUser &&
+            <Reveal animated='move'>
+              <Reveal.Content visible style={{ width: '100%' }}>
+                <Button
+                  fluid
+                  color='teal'
+                  content={following ? 'Following' : 'Not following'}
+                />
+              </Reveal.Content>
+              <Reveal.Content hidden>
+                <Button
+                  loading={loading}
+                  fluid
+                  basic
+                  color={following ? 'red' : 'green'}
+                  content={following ? 'Unfollow' : 'Follow'}
+                  onClick={following ? () => unfollow(username) : () => follow(username)}
+                />
+              </Reveal.Content>
+            </Reveal>}
         </Grid.Column>
       </Grid>
     </Segment>

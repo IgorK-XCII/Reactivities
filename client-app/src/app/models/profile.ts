@@ -3,7 +3,10 @@ export interface IProfile {
     username: string;
     bio: string;
     image: string;
-    photos: IPhoto[]
+    following: boolean;
+    followersCount: number;
+    followingCount: number;
+    photos: IPhoto[];
 }
 
 export interface IPhoto {
@@ -15,4 +18,9 @@ export interface IPhoto {
 export interface IDescription {
     displayName: string;
     bio: string;
+}
+
+export enum Predicate {
+    Followers = 'followers',
+    Following = 'following'
 }

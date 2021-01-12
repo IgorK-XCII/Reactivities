@@ -1,4 +1,4 @@
-import { IPhoto, IDescription } from './../models/profile';
+import { IPhoto, IDescription, Predicate } from './../models/profile';
 import { IUserFormValues } from './../models/user';
 import { history } from './../../index';
 import { IActivity } from './../models/activity';
@@ -39,17 +39,17 @@ const sleep = (ms: number) =>
     (response: AxiosResponse) => new Promise<AxiosResponse>(resolve => setTimeout(() => resolve(response), ms));
 
 const request = {
-    get: (url: string) => axios.get(url).then(sleep(1000)).then(responseBody),
-    post: (url: string, body: {}) => axios.post(url, body).then(sleep(1000)).then(responseBody),
-    put: (url: string, body: {}) => axios.put(url, body).then(sleep(1000)).then(responseBody),
-    del: (url: string) => axios.delete(url).then(sleep(1000)).then(responseBody),
+    get: (url: string) => axios.get(url).then(sleep(200)).then(responseBody),
+    post: (url: string, body: {}) => axios.post(url, body).then(sleep(500)).then(responseBody),
+    put: (url: string, body: {}) => axios.put(url, body).then(sleep(500)).then(responseBody),
+    del: (url: string) => axios.delete(url).then(sleep(500)).then(responseBody),
     postForm: (url: string, file: Blob) => {
         let formData = new FormData();
         formData.append('File', file);
         return axios.post(url, formData, {
             headers: { 'Content-type': 'multipart/form-data' }
         }).then(responseBody);
-    }
+    },
 };
 
 export const Activities = {
@@ -59,7 +59,7 @@ export const Activities = {
     edit: (activity: IActivity) => request.put(`/activities/${activity.id}`, activity),
     remove: (id: string) => request.del(`/activities/${id}`),
     attend: (id: string): Promise<void> => request.post(`/activities/${id}/attend`, {}),
-    unattend: (id: string): Promise<void> => request.del(`/activities/${id}/attend`)
+    unattend: (id: string): Promise<void> => request.del(`/activities/${id}/attend`),
 };
 
 const User = {
@@ -70,10 +70,13 @@ const User = {
 
 const Profiles = {
     get: (username: string): Promise<IProfile> => request.get(`/profiles/${username}`),
-    editDescription: (description: IDescription) : Promise<void> => request.put('/profiles/', description),
+    editDescription: (description: IDescription): Promise<void> => request.put('/profiles/', description),
     uploadPhoto: (photo: Blob): Promise<IPhoto> => request.postForm('/photos', photo),
     setMainPhoto: (photoId: string): Promise<void> => request.post(`/photos/${photoId}/setmain`, {}),
     deletePhoto: (photoId: string): Promise<void> => request.del(`/photos/${photoId}`),
+    follow: (username: string): Promise<void> => request.post(`/profiles/${username}/follow`, {}),
+    unfollow: (username: string): Promise<void> => request.del(`/profiles/${username}/follow`),
+    listFollowings: (username: string, predicate: Predicate): Promise<IProfile[]> => request.get(`/profiles/${username}/follow?predicate=${predicate}`)
 }
 
 const agent = {
