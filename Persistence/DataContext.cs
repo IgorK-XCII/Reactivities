@@ -12,6 +12,8 @@ namespace Persistence
         public DbSet<UserActivity> UserActivities { get; set; }
         public DbSet<Photo> Photos { get; set; }
         public DbSet<Comment> Comments { get; set; }
+        public DbSet<UserFollowing> Followings { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -23,18 +25,33 @@ namespace Persistence
                     new Value { Id = 2, Name = "Value 102" },
                     new Value { Id = 3, Name = "Value 103" }
                 );
-            builder.Entity<UserActivity>()
-                .HasKey(ua => new { ua.AppUserId, ua.ActivityId });
+            builder.Entity<UserActivity>(b =>
+            {
+                b.HasKey(ua => new { ua.AppUserId, ua.ActivityId });
 
-            builder.Entity<UserActivity>()
-                .HasOne(ua => ua.AppUser)
-                .WithMany(u => u.UserActivities)
-                .HasForeignKey(ua => ua.AppUserId);
+                b.HasOne(ua => ua.AppUser)
+                    .WithMany(u => u.UserActivities)
+                    .HasForeignKey(ua => ua.AppUserId);
 
-            builder.Entity<UserActivity>()
-                .HasOne(ua => ua.Activity)
-                .WithMany(a => a.UserActivities)
-                .HasForeignKey(ua => ua.ActivityId);
+                b.HasOne(ua => ua.Activity)
+                    .WithMany(a => a.UserActivities)
+                    .HasForeignKey(ua => ua.ActivityId);
+            });
+
+            builder.Entity<UserFollowing>(b =>
+            {
+                b.HasKey(uf => new { uf.ObserverId, uf.TargetId });
+
+                b.HasOne(u => u.Observer)
+                    .WithMany(o => o.Followings)
+                    .HasForeignKey(f => f.ObserverId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                b.HasOne(u => u.Target)
+                    .WithMany(t => t.Followers)
+                    .HasForeignKey(f => f.TargetId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
         }
     }
 }
